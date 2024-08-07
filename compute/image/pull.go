@@ -49,7 +49,7 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 
 	compute.DefaultLogger.Info(" * Download completed", "image", imageName, "path", img.Filepath)
 
-	return img, nil
+	return imageName, nil
 }
 
 func ParseImageName(rawImageName string) string {

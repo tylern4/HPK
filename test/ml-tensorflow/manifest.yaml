@@ -11,6 +11,8 @@ spec:
     metadata:
       labels:
         app: resnet-server
+      annotations:
+          slurm.hpk.io/flags: "--nodes=1 --time=10 --ntasks-per-node=1 -C cpu --exclusive --account=m3792 --qos=debug"
     spec:
       containers:
         - name: resnet-container

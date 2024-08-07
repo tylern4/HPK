@@ -92,6 +92,25 @@ build-race: ## Build HPK binary with race condition detector
 
 
 ##@ Deployment
+# Runs the Kubernetes master using Podman
+run-podman:
+	mkdir -p ${K8SFS_PATH}/log
+	podman-hpc run --name=k8 --net=host --env K8SFS_MOCK_KUBELET=0 \
+	-v $(HOME)/.k8sfs:/usr/local/etc \
+	-v $(HOME)/.k8sfs/log:/var/log \
+	localhost/k8s:1.0
+
+# Updates the kubeconfig file
+update-kubeconfig:
+	# Ensure the script has execution permissions
+	chmod +x update_kubeconfig.sh 
+	./update_kubeconfig.sh
+
+# The all target which runs both the container and updates kubeconfig
+all: run-podman
+	@echo "Waiting for container to be ready..."
+	# Optionally, wait for some time
+	$(MAKE) update-kubeconfig
 
 run-kubemaster: ## Run the Kubernetes Master
 	mkdir -p ${K8SFS_PATH}/log
@@ -129,7 +148,7 @@ run-kubelet: ## Run the HPK Virtual Kubelet
 	APISERVER_KEY_LOCATION=bin/kubelet.key \
 	APISERVER_CERT_LOCATION=bin/kubelet.crt \
 	VKUBELET_ADDRESS=${HOST_ADDRESS} \
-	./bin/hpk-kubelet
+	./bin/hpk-kubelet 
 
 ##@ Test
 

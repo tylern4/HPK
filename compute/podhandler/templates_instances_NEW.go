@@ -94,7 +94,7 @@ handle_init_containers() {
 {{- range $index, $container := .InitContainers}}
 	echo "[Virtual]* Running init container {{$index}}"
 	
-	$(${apptainer} {{ $container.ExecutionMode }} --compat --cleanenv --pid --no-mount tmp,home  \ 
+	$(${podman-hpc} {{ $container.ExecutionMode }} --compat --cleanenv --pid --no-mount tmp,home  \ 
 	{{- if $container.EnvFilePath}}
 	--env-file {{$container.EnvFilePath}} \
 	{{- end}}
@@ -116,7 +116,7 @@ spinup_instances() {
 {{- range $index, $container := .Containers}}
 	echo "[Virtual] Starting instance://{{$container.InstanceName}}"
 
-	${apptainer}  -d instance start --no-init --no-umask --no-eval --no-mount tmp,home --unsquash --writable-tmpfs \
+	${podman-hpc}  -d instance start --no-init --no-umask --no-eval --no-mount tmp,home --unsquash --writable-tmpfs \
 	{{- if $container.Binds}}
 	--bind {{join "," $container.Binds}} \
 	{{- end}}
@@ -131,7 +131,7 @@ teardown() {
 {{- range $index, $container := .Containers}}
 	echo "[Virtual] Stopping instance://{{$container.InstanceName}}"
 	
-	${apptainer} instance stop {{$container.InstanceName}} &> /dev/null &
+	${podman-hpc} instance stop {{$container.InstanceName}} &> /dev/null &
 {{- end}}
 
 	wait
@@ -188,7 +188,7 @@ wait_instance_ready() {
 	echo -n "[Host] ** Waiting for instance://{{$container.InstanceName}}"
 	while !  ${apptainer} instance list | grep "{{$container.InstanceName}}"; do 
 		echo "[... Retry {{$container.InstanceName}}"
-		${apptainer} instance list
+		${podman-hpc} instance list
 		sleep 3
 	done
 	echo "... Ready"
@@ -201,7 +201,7 @@ exec_containers() {
 	
 	echo instance://{{$container.InstanceName}} > {{$container.JobIDPath}}
 	
-	$(${apptainer} {{$container.ExecutionMode}} --compat --cleanenv \ 
+	$(${podman-hpc} {{$container.ExecutionMode}} --compat --cleanenv \ 
 	{{- if $container.EnvFilePath}}
 	--env-file {{$container.EnvFilePath}} \
 	{{- end}}
@@ -268,7 +268,7 @@ trap env_abort SIGTERM SIGKILL SIGQUIT INT
 
 echo "[Host] Starting the constructor the Virtual Environment ..."
 
-${apptainer} exec --net --network=flannel --fakeroot \
+${podman-hpc} exec --net --network=flannel --fakeroot \
 --env PARENT=${PPID}								 \
 --bind /bin,/etc/apptainer,/var/lib/apptainer,/lib,/lib64,/usr,/etc/passwd,$HOME,/run/shm \
 docker://alpine {{.VirtualEnv.ConstructorFilePath}} &

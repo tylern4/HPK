@@ -105,18 +105,18 @@ function debug_info() {
 }
 
 handle_dns() {
-	mkdir -p /scratch/etc
+	mkdir -p /tmp/scratch/etc
 	
 # Rewire /scratch/etc/resolv.conf to point to KubeDNS
-cat > /scratch/etc/resolv.conf << DNS_EOF
+cat > /tmp/scratch/etc/resolv.conf << DNS_EOF
 search {{.Pod.Namespace}}.svc.cluster.local svc.cluster.local cluster.local
 nameserver {{.HostEnv.KubeDNS}}
 options ndots:5
 DNS_EOF
 	
 	# Add hostname to known hosts. Required for loopback
-	echo -e "127.0.0.1 localhost" >> /scratch/etc/hosts
-	echo -e "$(hostname -I) $(hostname)" >> /scratch/etc/hosts
+	echo -e "127.0.0.1 localhost" >> /tmp/scratch/etc/hosts
+	echo -e "$(hostname -I | tr ' ' '\n' | grep '^128' | head -n 1) $(hostname)" >> /tmp/scratch/etc/hosts
 }
 
 # If not removed, Flags will be consumed by the nested Singularity and overwrite paths.
@@ -164,7 +164,7 @@ function handle_init_containers() {
 	echo "[Virtual] Spawning InitContainer: {{$container.InstanceName}}"
 	 
 	{{- if $container.EnvFilePath}}
-	sh -c {{$container.EnvFilePath}} > /scratch/{{$container.InstanceName}}.env
+	sh -c {{$container.EnvFilePath}} > /tmp/scratch/{{$container.InstanceName}}.env
 	{{- end}}
 
 	# Mark the beginning of an init job (all get the shell's pid).  
@@ -206,21 +206,31 @@ function handle_containers() {
 	####################
 
 	{{- if $container.EnvFilePath}}
-	sh -c {{$container.EnvFilePath}} > /scratch/{{$container.InstanceName}}.env
+	sh -c {{$container.EnvFilePath}} > /tmp/scratch/{{$container.InstanceName}}.env
 	{{- end}}
 
-	$(apptainer {{ $container.ExecutionMode }} --cleanenv --writable-tmpfs --no-mount home --unsquash \
+	$(podman-hpc run --rm --network=host --no-hosts --workdir ${workdir} \
+	-e PARENT=${PPID} \
+	-v $HOME/.k8sfs/kubernetes:/k8s-data \
+	-v $HOME:$HOME \
+	-v $SCRATCH/hpk-tmp:/tmp \
+	-v /tmp/scratch/:/scratch \
+	--hostname $SLURM_JOB_NAME \
 	{{- if $container.RunAsUser}}
-	--security uid:{{$container.RunAsUser}},gid:{{$container.RunAsUser}} --userns \
+	--user {{$container.RunAsUser}} \
 	{{- end}}
 	{{- if $container.RunAsGroup}}
-	--security gid:{{$container.RunAsGroup}} --userns \
+	--group-add {{$container.RunAsGroup}} \
 	{{- end}}
-	--bind /scratch/etc/resolv.conf:/etc/resolv.conf,/scratch/etc/hosts:/etc/hosts,{{join "," $container.Binds}} \
+	-v /tmp/scratch/etc/resolv.conf:/etc/resolv.conf:ro \
+	-v /tmp/scratch/etc/hosts:/etc/hosts:ro \
+	{{- range $container.Binds}}
+	-v {{.}} \
+	{{- end}}
 	{{- if $container.EnvFilePath}}
-	--env-file /scratch/{{$container.InstanceName}}.env \
+	--env-file /tmp/scratch/{{$container.InstanceName}}.env \
 	{{- end}}
-	{{$container.ImageFilePath}}
+	gcr.io/tensorflow-serving/resnet:latest
 	{{- if $container.Command}}
 		{{- range $index, $cmd := $container.Command}} {{$cmd | param}} {{- end}}
 	{{- end -}} 
@@ -229,7 +239,6 @@ function handle_containers() {
 	{{- end }} \
 	&>> {{$container.LogsPath}}; \
 	echo $? > {{$container.ExitCodePath}}) &
-
 	pid=$!
 	echo pid://${pid} > {{$container.JobIDPath}}
 	echo "[Virtual] Container started: {{$container.InstanceName}} ${pid}"
@@ -252,7 +261,7 @@ echo "[Virtual] Resetting Environment ..."
 reset_env
 
 echo "[Virtual] Announcing IP ..."
-echo $(hostname -I) > {{.VirtualEnv.IPAddressPath}}
+echo $(hostname -I | tr ' ' '\n' | grep '^128' | head -n 1) > {{.VirtualEnv.IPAddressPath}}
 
 echo "[Virtual] Setting DNS ..."
 handle_dns
@@ -313,14 +322,22 @@ trap 'echo [HOST] Deleting workdir ${workdir}; rm -rf ${workdir}' EXIT
 
 # --network-args "portmap=8080:80/tcp"
 # --container is needed to start a separate /dev/sh
-exec {{$.HostEnv.ApptainerBin}} exec --containall --net --fakeroot --scratch /scratch --workdir ${workdir} \
-{{- if .HostEnv.EnableCgroupV2}}
---apply-cgroups {{.VirtualEnv.CgroupFilePath}} 		\
-{{- end}}
---env PARENT=${PPID}								\
---bind $HOME,/tmp										\
---hostname {{.Pod.Name}}							\
-{{$.PauseImageFilePath}} sh -ci {{.VirtualEnv.ConstructorFilePath}} ||
+#exec podman run --rm --network=host --userns=keep-id --tmpfs /scratch --workdir ${workdir} \
+#{{- if .HostEnv.EnableCgroupV2}}
+#--cgroup-manager cgroupfs --cgroupsv2 --cgroup-conf {{.VirtualEnv.CgroupFilePath}} \
+#{{- end}}
+#-e PARENT=${PPID} \
+#-v $HOME/.k8sfs/kubernetes:/k8s-data:Z \
+#-v /etc/apptainer/apptainer.conf:/etc/apptainer/apptainer.conf:ro,Z \
+#-v $HOME:$HOME:Z \
+#-v /tmp:/tmp:Z \
+#--hostname {{.Pod.Name}} \
+#{{$.PauseImageFilePath}} sh -ci {{.VirtualEnv.ConstructorFilePath}} ||
+#echo "[HOST] **SYSTEMERROR** apptainer exited with code $?" | tee {{.VirtualEnv.SysErrorFilePath}}
+
+export APPTAINERENV_KUBEDNS_IP={{.HostEnv.KubeDNS}}
+
+exec sh -ci {{.VirtualEnv.ConstructorFilePath}} ||
 echo "[HOST] **SYSTEMERROR** apptainer exited with code $?" | tee {{.VirtualEnv.SysErrorFilePath}}
 
 #### END SECTION: Host Environment ####

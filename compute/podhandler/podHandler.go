@@ -355,6 +355,8 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	}
 
 	scriptFileContent := bytes.Buffer{}
+	
+	
 
 	if err := scriptTemplate.Execute(&scriptFileContent, JobFields{
 		Pod:                h.podKey,
@@ -384,11 +386,13 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 		compute.SystemPanic(err, "unable to write sbatch script in file '%s'", scriptFilePath)
 	}
 
-	logger.Info(" * Slurm script has been generated")
+	logger.Info(" * Slurm script has been generated TEST TEST")
 
 	/*---------------------------------------------------
 	 * Submit job to Slurm, and store the JobID
 	 *---------------------------------------------------*/
+	logger.Info("Script file path: ", "scriptFilePath", scriptFilePath)
+
 	jobID, err := slurm.SubmitJob(scriptFilePath)
 	if err != nil {
 		compute.SystemPanic(err, "failed to submit job")

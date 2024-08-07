@@ -40,8 +40,8 @@ const SbatchScriptTemplate = `#!/bin/bash
 {{- if .Options.CustomFlags}}
 {{.Options.CustomFlags}}
 {{end}}
-export apptainer={{.HostEnv.ApptainerBin}}
-echo "Using ApptainerBin: ${apptainer}"
+export apptainer={{.HostEnv.PodmanBin}}
+echo "Using PodmanBin: ${apptainer}"
 
 #### BEGIN SECTION: VirtualEnvironment Builder ####
 # Description

@@ -32,7 +32,7 @@ func (p *Image) FakerootExec(singularityArgs []string, cmd []string) (string, er
 	execCmd = append(execCmd, p.Filepath)
 	execCmd = append(execCmd, cmd...)
 
-	out, err := process.Execute(compute.Environment.ApptainerBin, execCmd...)
+	out, err := process.Execute(compute.Environment.PodmanBin, execCmd...)
 
 	return string(out), err
 }

@@ -39,11 +39,11 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 			return img, nil
 		}
 
-		return nil, errors.Errorf("imagePath '%s' is not a regular fie", img.Filepath)
+		return nil, errors.Errorf("imagePath '%s' is not a regular file", img.Filepath)
 	}
 
 	// otherwise, download a fresh copy
-	if _, err := process.Execute(compute.Environment.ApptainerBin, "pull", "--dir", imageDir, transport.Wrap(imageName)); err != nil {
+	if _, err := process.Execute(compute.Environment.PodmanBin, "pull", imageName); err != nil {
 		return nil, errors.Wrapf(err, "downloading has failed")
 	}
 

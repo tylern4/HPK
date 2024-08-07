@@ -230,7 +230,7 @@ function handle_containers() {
 	{{- if $container.EnvFilePath}}
 	--env-file /tmp/scratch/{{$container.InstanceName}}.env \
 	{{- end}}
-	gcr.io/tensorflow-serving/resnet:latest
+	{{$container.ImageFilePath}}
 	{{- if $container.Command}}
 		{{- range $index, $cmd := $container.Command}} {{$cmd | param}} {{- end}}
 	{{- end -}} 
@@ -319,21 +319,6 @@ export workdir=/tmp/{{.Pod.Namespace}}_{{.Pod.Name}}
 echo "[Host] Creating workdir: ${workdir} "
 mkdir -p ${workdir}
 trap 'echo [HOST] Deleting workdir ${workdir}; rm -rf ${workdir}' EXIT
-
-# --network-args "portmap=8080:80/tcp"
-# --container is needed to start a separate /dev/sh
-#exec podman run --rm --network=host --userns=keep-id --tmpfs /scratch --workdir ${workdir} \
-#{{- if .HostEnv.EnableCgroupV2}}
-#--cgroup-manager cgroupfs --cgroupsv2 --cgroup-conf {{.VirtualEnv.CgroupFilePath}} \
-#{{- end}}
-#-e PARENT=${PPID} \
-#-v $HOME/.k8sfs/kubernetes:/k8s-data:Z \
-#-v /etc/apptainer/apptainer.conf:/etc/apptainer/apptainer.conf:ro,Z \
-#-v $HOME:$HOME:Z \
-#-v /tmp:/tmp:Z \
-#--hostname {{.Pod.Name}} \
-#{{$.PauseImageFilePath}} sh -ci {{.VirtualEnv.ConstructorFilePath}} ||
-#echo "[HOST] **SYSTEMERROR** apptainer exited with code $?" | tee {{.VirtualEnv.SysErrorFilePath}}
 
 export APPTAINERENV_KUBEDNS_IP={{.HostEnv.KubeDNS}}
 

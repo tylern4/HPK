@@ -29,7 +29,8 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 	imageName = strings.Split(imageName, "@")[0]
 
 	img := &Image{
-		Filepath: imageDir + ParseImageName(imageName),
+		// Filepath: imageDir + ParseImageName(imageName),
+		Filepath: imageName,
 	}
 
 	// check if image exists
@@ -49,7 +50,7 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 
 	compute.DefaultLogger.Info(" * Download completed", "image", imageName, "path", img.Filepath)
 
-	return imageName, nil
+	return img, nil
 }
 
 func ParseImageName(rawImageName string) string {

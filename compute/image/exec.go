@@ -31,7 +31,8 @@ func (p *Image) FakerootExec(singularityArgs []string, cmd []string) (string, er
 	execCmd = append(execCmd, singularityArgs...)
 	execCmd = append(execCmd, p.Filepath)
 	execCmd = append(execCmd, cmd...)
-
+	// print the command
+	compute.DefaultLogger.Info(" * Executing command", "command", execCmd)
 	out, err := process.Execute(compute.Environment.PodmanBin, execCmd...)
 
 	return string(out), err

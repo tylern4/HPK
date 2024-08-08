@@ -3,11 +3,12 @@ from __future__ import print_function
 import base64
 import io
 import json
-
+import sys
 import numpy as np
 from PIL import Image
 import requests
 from time import perf_counter
+
 
 # The server URL specifies the endpoint of your server running the ResNet
 # model with the name "resnet" and using the predict interface.
@@ -51,7 +52,7 @@ def main():
     all_throughputs_results = {}
     for iteration in range(NUM_ITERATIONS):
     
-        NUMBER_OF_REQUESTS = 1
+        NUMBER_OF_REQUESTS = int(sys.argv[1])
         predictions = []
         t_0 = perf_counter()
         for _ in range(NUMBER_OF_REQUESTS):

@@ -82,7 +82,7 @@ def main():
         print(f'Average latency: {avg_latency:.2f} ms')
         
         # use the index to get the class name
-        print(f"Class name: {class_names[max_index]}")
+        print(f"Class name: {class_names[max_index-1]}")
     
     output_file_name_throughput = "throughput_{}_requests.json".format(NUMBER_OF_REQUESTS)
     with open(output_file_name_throughput, "w") as f:

@@ -7,8 +7,7 @@ import json
 import numpy as np
 from PIL import Image
 import requests
-
-RESNET_IP = '128.55.71.95'
+from time import perf_counter
 
 # The server URL specifies the endpoint of your server running the ResNet
 # model with the name "resnet" and using the predict interface.
@@ -37,48 +36,57 @@ def main():
     with open(IMAGE_PATH, 'rb') as image_file:
         image_data = image_file.read()
 
-    # Compose a JSON Predict request (send the image tensor).
-    jpeg_rgb = Image.open(io.BytesIO(image_data))
-    # Normalize and batchify the image
-    jpeg_rgb = np.expand_dims(np.array(jpeg_rgb) / 255.0, 0).tolist()
-    predict_request = json.dumps({'instances': jpeg_rgb})
-
     # Compose a JSON Predict request (send JPEG image in base64).
     jpeg_bytes = base64.b64encode(image_data).decode('utf-8')
     predict_request = '{"instances" : [{"b64": "%s"}]}' % jpeg_bytes
 
+    warm_up_num_requests = 3
     # Send few requests to warm-up the model.
-    for _ in range(1):
+    for _ in range(warm_up_num_requests):
         response = requests.post(SERVER_URL, data=predict_request)
         response.raise_for_status()
 
     # Send few actual requests and report average latency.
-    total_time = 0
-    num_requests = 1
-    predictions = []
-    for _ in range(num_requests):
-        response = requests.post(SERVER_URL, data=predict_request)
-        response.raise_for_status()
-	 # Print the whole response
-        print("Full Response JSON:", response.json())
-        total_time += response.elapsed.total_seconds()
-        prediction = response.json()['predictions'][0]['probabilities']
-        predictions.append(prediction)
-
-    # Print average latency
-    # print("Class predicted: ", np.argmax(prediction))
-    # print("All predictions: ", prediction)
-    # Find the index of the highest probability
-    max_index = prediction.index(max(prediction))
-
-    print(f"The index of the highest probability is: {max_index}")
-    print(f"The highest probability is : {max(prediction)}")
-    print(f"The length of probabilities is: {len(prediction)}")
-    avg_latency = (total_time * 1000) / num_requests
-    print(f'Average latency: {avg_latency:.2f} ms')
+    NUM_ITERATIONS = 1
+    all_throughputs_results = {}
+    for iteration in range(NUM_ITERATIONS):
     
-    # use the index to get the class name
-    print(f"Class name: {class_names[max_index]}")
+        NUMBER_OF_REQUESTS = 1
+        predictions = []
+        t_0 = perf_counter()
+        for _ in range(NUMBER_OF_REQUESTS):
+            response = requests.post(SERVER_URL, data=predict_request)
+            response.raise_for_status()
+            # print("Full Response JSON:", response.json())
+            total_time += response.elapsed.total_seconds()
+            prediction = response.json()['predictions'][0]['probabilities']
+            predictions.append(prediction)
+        t_n = perf_counter()
+        
+        throughput = NUMBER_OF_REQUESTS / (t_n - t_0)
+        print(f"Throughput: {throughput} requests per second")
+        
+        throughputs_results = {
+                "throughput": throughput,
+                "start_time": t_0,
+                "end_time": t_n
+            }
+        
+        all_throughputs_results[iteration] = throughputs_results
+        
+
+        max_index = prediction.index(max(prediction))
+
+        print(f"The highest probability is : {max(prediction)}")
+        avg_latency = ((t_n-t_0) * 1000) / NUMBER_OF_REQUESTS
+        print(f'Average latency: {avg_latency:.2f} ms')
+        
+        # use the index to get the class name
+        print(f"Class name: {class_names[max_index]}")
+    
+    output_file_name_throughput = "throughput_{}_requests.json".format(NUMBER_OF_REQUESTS)
+    with open(output_file_name_throughput, "w") as f:
+        json.dump(all_throughputs_results, f)
 
 
 if __name__ == '__main__':

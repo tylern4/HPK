@@ -76,6 +76,9 @@ def main():
     print(f"The length of probabilities is: {len(prediction)}")
     avg_latency = (total_time * 1000) / num_requests
     print(f'Average latency: {avg_latency:.2f} ms')
+    
+    # use the index to get the class name
+    print(f"Class name: {class_names[max_index]}")
 
 
 if __name__ == '__main__':

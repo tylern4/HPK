@@ -115,8 +115,6 @@ run-kubelet: CA_BUNDLE = $(shell cat ${KUBE_PATH}/pki/ca.crt | base64 | tr -d '\
 run-kubelet: HOST_ADDRESS = $(shell ip route get 1 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')
 run-kubelet: ## Run the HPK Virtual Kubelet
 	@echo "===> Generate HPK Certificates <==="
-	# Load the required module
-	module load spin
 	mkdir -p ./bin
 
 	if [ ! -f bin/kubelet.key ]; then openssl genrsa -out bin/kubelet.key 2048; fi

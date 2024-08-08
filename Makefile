@@ -100,18 +100,6 @@ run-podman:
 	-v $(HOME)/.k8sfs/log:/var/log \
 	localhost/k8s:1.0
 
-# Updates the kubeconfig file
-update-kubeconfig:
-	# Ensure the script has execution permissions
-	chmod +x update_kubeconfig.sh 
-	./update_kubeconfig.sh
-
-# The all target which runs both the container and updates kubeconfig
-all: run-podman
-	@echo "Waiting for container to be ready..."
-	# Optionally, wait for some time
-	$(MAKE) update-kubeconfig
-
 run-kubemaster: ## Run the Kubernetes Master
 	mkdir -p ${K8SFS_PATH}/log
 	apptainer run --net --dns ${EXTERNAL_DNS} --fakeroot \
@@ -127,6 +115,8 @@ run-kubelet: CA_BUNDLE = $(shell cat ${KUBE_PATH}/pki/ca.crt | base64 | tr -d '\
 run-kubelet: HOST_ADDRESS = $(shell ip route get 1 | sed -n 's/.*src \([0-9.]\+\).*/\1/p')
 run-kubelet: ## Run the HPK Virtual Kubelet
 	@echo "===> Generate HPK Certificates <==="
+	# Load the required module
+	module load spin
 	mkdir -p ./bin
 
 	if [ ! -f bin/kubelet.key ]; then openssl genrsa -out bin/kubelet.key 2048; fi

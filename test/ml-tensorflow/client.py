@@ -12,7 +12,9 @@ from time import perf_counter
 
 # The server URL specifies the endpoint of your server running the ResNet
 # model with the name "resnet" and using the predict interface.
-SERVER_URL = 'http://128.55.81.13:8501/v1/models/resnet:predict'
+# extract env variable RESNET_IP
+RESNET_IP = sys.env['RESNET_IP']
+SERVER_URL = 'http://{}:8501/v1/models/resnet:predict'.format(RESNET_IP)
 
 # The image URL is the location of the image we should send to the server
 IMAGE_PATH = 'dog.jpg'
@@ -48,7 +50,7 @@ def main():
         response.raise_for_status()
 
     # Send few actual requests and report average latency.
-    NUM_ITERATIONS = 1
+    NUM_ITERATIONS = 5
     all_throughputs_results = {}
     for iteration in range(NUM_ITERATIONS):
     
@@ -59,7 +61,6 @@ def main():
             response = requests.post(SERVER_URL, data=predict_request)
             response.raise_for_status()
             # print("Full Response JSON:", response.json())
-            total_time += response.elapsed.total_seconds()
             prediction = response.json()['predictions'][0]['probabilities']
             predictions.append(prediction)
         t_n = perf_counter()

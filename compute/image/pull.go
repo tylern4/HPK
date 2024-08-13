@@ -40,7 +40,7 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 
 	*/
 
-	res, err := process.Execute(compute.Environment.PodmanBin, "images", fmt.Sprintf("--filter reference=%s --format=\"{{.Names}}|{{.IsReadOnly}}\"", imageName))
+	res, err := process.Execute(compute.Environment.PodmanBin, "images", fmt.Sprintf(" --format=\"{{.Names}}|{{.IsReadOnly}}\" --filter reference=%s", imageName))
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed to check the image")
 	}

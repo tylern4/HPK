@@ -46,7 +46,7 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 	}
 
 
-	compute.DefaultLogger.Info(" The res from the images command is ", "res", res)
+	compute.DefaultLogger.Info(" The res from the images command is ", "res", string(res))
 
 	// this string needs to be parsed deliminated by | and then check if the image is readonly
 	// imageNameToCheck, readonly = strings.Split(res, "|")

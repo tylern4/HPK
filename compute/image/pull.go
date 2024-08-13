@@ -45,12 +45,7 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 		return nil, errors.Wrapf(err, "Failed to check the image")
 	}
 
-	// finish the check
-	// print the res
-
 	compute.DefaultLogger.Info(" The res from the images command is ", "res", res)
-
-
 
 	// this string needs to be parsed deliminated by | and then check if the image is readonly
 	// imageNameToCheck, readonly = strings.Split(res, "|")
@@ -70,12 +65,11 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 		return nil, errors.Wrapf(err, "downloading has failed")
 	}
 
-	compute.DefaultLogger.Info(" * Download completed", "image", imageName, "path", img.ImageName)
-
 
 	img := &Image{
 		ImageName: imageName,	
 	}
+	compute.DefaultLogger.Info(" * Download completed", "image", imageName, "path", img.ImageName)
 
 	return img, nil
 }

@@ -28,20 +28,42 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 	// "Docker references with both a tag and digest are currently not supported".
 	imageName = strings.Split(imageName, "@")[0]
 
-	img := &Image{
-		// Filepath: imageDir + ParseImageName(imageName),
-		Filepath: imageName,
+	// NT notes:
+	/*
+	
+	Podamn commmand images to see if the image is there based on the name, and also check if it is read only
+	podman-hpc images --format="{{.Names}}|{{.Readonly}}" 
+	this command needs 
+	
+	check if imageName is the same with the result and also if the readonly is true.
+	if the check passes we don't have to pull but we can use directly 
+	Keep in mind the ImagePullpolicy implementation for the future 
+
+	*/
+
+	if res, err := process.Execute(compute.Environment.PodmanBin, "images", "--format={{.Names}}|{{.Readonly}}"); err != nil {
+		return nil, errors.Wrapf(err, "Failed to check the image")
 	}
 
-	// check if image exists
-	file, err := os.Stat(img.Filepath)
-	if err == nil {
-		if file.Mode().IsRegular() {
-			return img, nil
-		}
+	// finish the check
+	// print the res
 
-		return nil, errors.Errorf("imagePath '%s' is not a regular file", img.Filepath)
-	}
+	compute.DefaultLogger.Info(" The res from the images command is ", "res", res)
+
+
+
+	// this string needs to be parsed deliminated by | and then check if the image is readonly
+	// imageNameToCheck, readonly = strings.Split(res, "|")
+	// // readonly = strings.Split(res, "|")[1]
+
+	// if imageName == imageNameToCheck && readonly == "true" {
+	// 	compute.DefaultLogger.Info(" * Image already exists", "image", imageName, "path", imageName)
+	// 	return &Image{
+	// 		ImageName: imageName,
+	// 	}
+	// }
+
+	
 
 	// otherwise, download a fresh copy
 	if _, err := process.Execute(compute.Environment.PodmanBin, "pull", imageName); err != nil {
@@ -49,6 +71,11 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 	}
 
 	compute.DefaultLogger.Info(" * Download completed", "image", imageName, "path", img.Filepath)
+
+
+	img := &Image{
+		ImageName: imageName,	
+	}
 
 	return img, nil
 }

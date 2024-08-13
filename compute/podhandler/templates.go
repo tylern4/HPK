@@ -182,7 +182,7 @@ function handle_init_containers() {
 	{{- if $container.EnvFilePath}}
 	--env-file /scratch/{{$container.InstanceName}}.env \
 	{{- end}}
-	{{$container.ImageFilePath}}
+	{{$container.ImageName}}
 	{{- if $container.Command}}
 		{{- range $index, $cmd := $container.Command}} {{$cmd | param}} {{- end}}
 	{{- end -}} 
@@ -230,7 +230,7 @@ function handle_containers() {
 	{{- if $container.EnvFilePath}}
 	--env-file /tmp/scratch/{{$container.InstanceName}}.env \
 	{{- end}}
-	{{$container.ImageFilePath}}
+	{{$container.ImageName}}
 	{{- if $container.Command}}
 		{{- range $index, $cmd := $container.Command}} {{$cmd | param}} {{- end}}
 	{{- end -}} 
@@ -368,7 +368,7 @@ type Container struct {
 	// PodSecurityContext, the value specified in SecurityContext takes precedence.
 	RunAsGroup int64
 
-	ImageFilePath string // format: REGISTRY://image:tag
+	ImageName string // format: REGISTRY://image:tag
 
 	EnvFilePath string
 

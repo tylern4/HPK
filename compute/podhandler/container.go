@@ -157,7 +157,7 @@ func (h *podHandler) buildContainer(container *corev1.Container, containerStatus
 		InstanceName:  containerID,
 		RunAsUser:     uid,
 		RunAsGroup:    gid,
-		ImageFilePath: img.Filepath,
+		ImageName: img.ImageName,
 		EnvFilePath:   containerPath.EnvFilePath(),
 		Binds:         binds,
 		Command:       kubecontainer.ExpandContainerCommandOnlyStatic(container.Command, container.Env),
@@ -175,7 +175,7 @@ func (h *podHandler) buildContainer(container *corev1.Container, containerStatus
 	containerStatus.ContainerID = containerID
 
 	containerStatus.Image = container.Image
-	containerStatus.ImageID = img.Filepath
+	containerStatus.ImageID = img.ImageName
 
 	return c, nil
 }

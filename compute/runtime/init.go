@@ -36,7 +36,7 @@ func Initialize() error {
 	if err != nil {
 		return errors.Wrapf(err, "failed to get pause container image")
 	}
-
+	// remove this step beacuse it is not needed and all the Pause image references need to be removed
 	DefaultPauseImage = img
 
 	compute.DefaultLogger.Info("Runtime info",

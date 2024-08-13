@@ -242,3 +242,4 @@ func TestConstructorSyntax(t *testing.T) {
 		// os.Remove(f.Name())
 	}
 }
+

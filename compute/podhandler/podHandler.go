@@ -37,7 +37,8 @@ import (
 )
 
 const (
-	CustomSlurmFlags = "slurm.hpk.io/flags"
+	CustomSlurmFlags = "slurm.hpk.io/flags",
+	DefaultSlurmType = "slurm.hpk.io/type",
 )
 
 // LoadPodFromKey waits LoadPodFromFile with filePath discovery.
@@ -345,9 +346,16 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	 * Prepare Fields for Sbatch Templates
 	 *---------------------------------------------------*/
 	var customFlags []string
+		//  default to the slurm type as a base
+		//  adding to customFlags
 	if flags, hasFlags := h.Pod.GetAnnotations()[CustomSlurmFlags]; hasFlags {
 		customFlags = strings.Split(flags, " ")
-	}
+	} 
+
+
+
+	// necessary for the template are constraints
+	// map the pod's annotations to the config.json
 
 	scriptTemplate, err := ParseTemplate(HostScriptTemplate)
 	if err != nil {

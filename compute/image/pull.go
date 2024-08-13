@@ -70,7 +70,7 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 		return nil, errors.Wrapf(err, "downloading has failed")
 	}
 
-	compute.DefaultLogger.Info(" * Download completed", "image", imageName, "path", img.Filepath)
+	compute.DefaultLogger.Info(" * Download completed", "image", imageName, "path", img.ImageName)
 
 
 	img := &Image{

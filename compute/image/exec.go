@@ -22,14 +22,14 @@ import (
 // Image is an actionable object of a container image.
 type Image struct {
 	// Filepath points to the location where the image is stored.
-	Filepath string
+	ImageName string
 }
 
 // FakerootExec uses Singularity to instantiate the image and run a command.
 func (p *Image) FakerootExec(singularityArgs []string, cmd []string) (string, error) {
 	execCmd := []string{"exec", "--fakeroot"}
 	execCmd = append(execCmd, singularityArgs...)
-	execCmd = append(execCmd, p.Filepath)
+	execCmd = append(execCmd, p.ImageName)
 	execCmd = append(execCmd, cmd...)
 	// print the command
 	compute.DefaultLogger.Info(" * Executing command", "command", execCmd)

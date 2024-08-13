@@ -16,6 +16,7 @@ package image
 
 import (
 	"strings"
+	"fmt"
 	"github.com/carv-ics-forth/hpk/compute"
 	"github.com/carv-ics-forth/hpk/pkg/process"
 	"github.com/pkg/errors"

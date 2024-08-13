@@ -37,8 +37,8 @@ import (
 )
 
 const (
-	CustomSlurmFlags = "slurm.hpk.io/flags",
-	DefaultSlurmType = "slurm.hpk.io/type",
+	CustomSlurmFlags = "slurm.hpk.io/flags"
+	DefaultSlurmType = "slurm.hpk.io/type"
 )
 
 // LoadPodFromKey waits LoadPodFromFile with filePath discovery.

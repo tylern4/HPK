@@ -15,7 +15,6 @@
 package image
 
 import (
-	"os"
 	"strings"
 
 	"github.com/carv-ics-forth/hpk/compute"
@@ -41,9 +40,11 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 
 	*/
 
-	if res, err := process.Execute(compute.Environment.PodmanBin, "images", "--format={{.Names}}|{{.Readonly}}"); err != nil {
+	res, err := process.Execute(compute.Environment.PodmanBin, "images", "--format={{.Names}}|{{.Readonly}}")
+	if err != nil {
 		return nil, errors.Wrapf(err, "Failed to check the image")
 	}
+
 
 	compute.DefaultLogger.Info(" The res from the images command is ", "res", res)
 

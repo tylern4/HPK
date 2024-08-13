@@ -368,7 +368,7 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 
 	if err := scriptTemplate.Execute(&scriptFileContent, JobFields{
 		Pod:                h.podKey,
-		PauseImageFilePath: pauseImage.Filepath,
+		PauseImageFilePath: pauseImage.ImageName,
 		HostEnv:            compute.Environment,
 		VirtualEnv: compute.VirtualEnvironment{
 			PodDirectory:        h.podDirectory.String(),

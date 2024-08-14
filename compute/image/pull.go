@@ -48,18 +48,34 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 
 	compute.DefaultLogger.Info(" The res from the images command is ", "res", string(res))
 
-	// this string needs to be parsed deliminated by | and then check if the image is readonly
-	// imageNameToCheck, readonly = strings.Split(res, "|")
-	// // readonly = strings.Split(res, "|")[1]
 
-	// if imageName == imageNameToCheck && readonly == "true" {
-	// 	compute.DefaultLogger.Info(" * Image already exists", "image", imageName, "path", imageName)
-	// 	return &Image{
-	// 		ImageName: imageName,
-	// 	}
-	// }
+	cleanOutput := strings.Trim(res, "{}\" \n")
 
-	
+	// Split the output into lines
+	lines := strings.Split(cleanOutput, "\n")
+
+	for _, line := range lines {
+		// Trim extra quotes and spaces
+		line = strings.Trim(line, "\" ")
+
+		// Split by the '|' character
+		parts := strings.Split(line, "|")
+		if len(parts) != 2 {
+			continue
+		}
+
+		// Extract image name and condition
+		imagePart := strings.Trim(parts[0], "[] ")
+		condition := strings.Trim(parts[1], " ")
+
+		// Check if the image name matches and condition is true
+		if imagePart == imageName && condition == "true" {
+			compute.DefaultLogger.Info(" * Image already exists", "image", imageName, "path", imageName)
+			return &Image{
+				ImageName: imageName,
+			}, nil
+		}
+	}
 
 	// otherwise, download a fresh copy
 	if _, err := process.Execute(compute.Environment.PodmanBin, "pull", imageName); err != nil {

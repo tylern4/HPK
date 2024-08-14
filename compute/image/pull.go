@@ -47,6 +47,8 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 
 
 	compute.DefaultLogger.Info(" The res from the images command is ", "res", string(res))
+	// print the imageName
+	compute.DefaultLogger.Info(" * Image name", "image", imageName)
 
 
 	cleanOutput := strings.Trim(string(res), "{}\" \n")
@@ -66,12 +68,14 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 
 		// Extract image name and condition
 		imagePart := strings.Trim(parts[0], "[] ")
+		// remove the tag at the end of the image name
+		imagePart = strings.Split(imagePart, ":")[0]
 		condition := strings.Trim(parts[1], " ")
 
 		// print the image name and condition
 		compute.DefaultLogger.Info(" * Image name and condition from the trimming process", "image", imagePart, "condition", condition)
 
-		
+
 
 		// Check if the image name matches and condition is true
 		if imagePart == imageName && condition == "true" {

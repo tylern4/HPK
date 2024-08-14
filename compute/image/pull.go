@@ -68,12 +68,19 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 		imagePart := strings.Trim(parts[0], "[] ")
 		condition := strings.Trim(parts[1], " ")
 
+		// print the image name and condition
+		compute.DefaultLogger.Info(" * Image name and condition from the trimming process", "image", imagePart, "condition", condition)
+
+		
+
 		// Check if the image name matches and condition is true
 		if imagePart == imageName && condition == "true" {
 			compute.DefaultLogger.Info(" * Image already exists", "image", imageName, "path", imageName)
 			return &Image{
 				ImageName: imageName,
 			}, nil
+		}else{
+			compute.DefaultLogger.Info(" * Image does not exist", "image", imageName, "path", imageName)
 		}
 	}
 

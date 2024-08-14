@@ -49,7 +49,7 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 	compute.DefaultLogger.Info(" The res from the images command is ", "res", string(res))
 
 
-	cleanOutput := strings.Trim(res, "{}\" \n")
+	cleanOutput := strings.Trim(string(res), "{}\" \n")
 
 	// Split the output into lines
 	lines := strings.Split(cleanOutput, "\n")

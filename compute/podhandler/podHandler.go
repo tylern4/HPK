@@ -345,12 +345,53 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	/*---------------------------------------------------
 	 * Prepare Fields for Sbatch Templates
 	 *---------------------------------------------------*/
-	var customFlags []string
+	var totalFlags []string
 		//  default to the slurm type as a base
 		//  adding to customFlags
-	if flags, hasFlags := h.Pod.GetAnnotations()[CustomSlurmFlags]; hasFlags {
-		customFlags = strings.Split(flags, " ")
-	} 
+
+	if defaultFlag, hasDefault := h.Pod.GetAnnotations()[DefaultSlurmType];  hasDefault{
+
+		// Step 1: Read the config.json file
+		file, err := os.Open("config.json")
+		if err != nil {
+			// Handle the error with compute.SystemPanic
+			compute.SystemPanic("Error opening config.json for Default Slurm Type: " + err.Error())
+			return
+		}
+		defer file.Close()
+
+		// Step 2: Unmarshal the JSON content into a map
+		byteValue, err := ioutil.ReadAll(file)
+		if err != nil {
+			// Handle the error with compute.SystemPanic
+			compute.SystemPanic("Error reading config.json for Default Slurm Type: " + err.Error())
+			return
+		}
+		err = json.Unmarshal(byteValue, &config)
+		if err != nil {
+			// Handle the error with compute.SystemPanic
+			compute.SystemPanic("Error parsing config.json for Default Slurm Type: " + err.Error())
+			return
+		}
+
+		// Step 3: Access the proper setting using the defaultFlag
+		if setting, exists := config[defaultFlag]; exists {
+			// Log the information with logger.Info
+			logger.Info("Setting for " + defaultFlag + ": " + setting)
+			// You can append this setting to totalFlags or use it otherwise
+			totalFlags = append(totalFlags, setting)
+		} else {
+			// Log the absence of a setting with logger.Info
+			logger.Info("No setting found for " + defaultFlag)
+		}
+	}
+	logger.Info(" * Default Slurm Type has been set")
+	logger.Info(" * Total Flags: ", totalFlags)
+	if customflags, hasFlags := h.Pod.GetAnnotations()[CustomSlurmFlags]; hasFlags {
+		totalFlags += append(totalFlags, strings.Split(customflags, " ")...)
+	}
+	logger.Info(" * Custom Slurm Flags have been set")
+	logger.Info(" * Total Flags: ", totalFlags)
 
 
 
@@ -382,7 +423,7 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 		InitContainers:  initContainers,
 		Containers:      containers,
 		ResourceRequest: resources.ResourceListToStruct(resourceRequest),
-		CustomFlags:     customFlags,
+		CustomFlags:     totalFlags,
 	}); err != nil {
 		/*-- since both the template and fields are internal to the code, the evaluation should always succeed	--*/
 		compute.SystemPanic(err, "failed to evaluate sbatch template")

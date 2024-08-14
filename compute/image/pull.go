@@ -23,19 +23,12 @@ import (
 )
 
 func Pull(imageDir string, transport Transport, imageName string) (*Image, error) {
-	// Remove the digest form the image, because Singularity fails with
+	// Remove the digest from the image, because Singularity fails with
 	// "Docker references with both a tag and digest are currently not supported".
 	imageName = strings.Split(imageName, "@")[0]
 
-	// NT notes:
 	/*
 	
-	Podamn commmand images to see if the image is there based on the name, and also check if it is read only
-	podman-hpc images --format="{{.Names}}|{{.Readonly}}" 
-	this command needs 
-	
-	check if imageName is the same with the result and also if the readonly is true.
-	if the check passes we don't have to pull but we can use directly 
 	Keep in mind the ImagePullpolicy implementation for the future 
 
 	*/
@@ -46,17 +39,14 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 	}
 
 
-	compute.DefaultLogger.Info(" The res from the images command is ", "res", string(res))
-	// print the imageName
-	compute.DefaultLogger.Info(" * Image name", "image", imageName)
-
-
 	cleanOutput := strings.Trim(string(res), "{}\" \n")
 
 	// Split the output into lines
 	lines := strings.Split(cleanOutput, "\n")
 
+	// Check every line to see if the image already exists
 	for _, line := range lines {
+		
 		// Trim extra quotes and spaces
 		line = strings.Trim(line, "\" ")
 
@@ -71,11 +61,6 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 		// remove the tag at the end of the image name
 		imagePart = strings.Split(imagePart, ":")[0]
 		condition := strings.Trim(parts[1], " ")
-
-		// print the image name and condition
-		compute.DefaultLogger.Info(" * Image name and condition from the trimming process", "image", imagePart, "condition", condition)
-
-
 
 		// Check if the image name matches and condition is true
 		if imagePart == imageName && condition == "true" {

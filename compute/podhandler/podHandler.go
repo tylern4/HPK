@@ -25,8 +25,6 @@ import (
 
 	"github.com/carv-ics-forth/hpk/compute"
 	"github.com/carv-ics-forth/hpk/compute/endpoint"
-	"github.com/carv-ics-forth/hpk/compute/image"
-	"github.com/carv-ics-forth/hpk/compute/runtime"
 	"github.com/carv-ics-forth/hpk/compute/slurm"
 	"github.com/carv-ics-forth/hpk/pkg/filenotify"
 	"github.com/carv-ics-forth/hpk/pkg/resources"
@@ -35,7 +33,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/json"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"github.com/carv-ics-forth/hpk/pkg/process"
 )
 
 const (

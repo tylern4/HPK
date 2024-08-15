@@ -2,7 +2,6 @@ package runtime
 
 import (
 	"os"
-
 	"github.com/carv-ics-forth/hpk/compute"
 	"github.com/carv-ics-forth/hpk/compute/endpoint"
 	"github.com/pkg/errors"

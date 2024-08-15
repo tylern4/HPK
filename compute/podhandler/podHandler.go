@@ -430,19 +430,18 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 			logger.Info("No setting found for " + defaultFlag)
 		}
 	}
-	logger.Info(" * Default Slurm Type has been set")
-	logger.Info(" * Total Flags: ", totalFlags)
+	logger.Info(" * Default Slurm Type has been set", "defaultFlag", totalFlags)
 	if customflags, hasFlags := h.Pod.GetAnnotations()[CustomSlurmFlags]; hasFlags {
 		totalFlags = append(totalFlags, strings.Split(customflags, " ")...)
 	}
-	logger.Info(" * Custom Slurm Flags have been set")
+
 	logger.Info(" * Total Flags: ", totalFlags)
 
 
 
 	scriptTemplate, err := ParseTemplate(HostScriptTemplate)
 	if err != nil {
-		compute.SystemPanic(err, "sbatch template error")
+		compute.SystemPanic(err, "sbatch template error", "template", HostScriptTemplate)
 	}
 
 	scriptFileContent := bytes.Buffer{}

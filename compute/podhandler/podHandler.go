@@ -389,17 +389,11 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 
 
 	if defaultFlag, hasDefault := h.Pod.GetAnnotations()[DefaultSlurmType];  hasDefault{
-
-		// Step 1: Read the config.json file, use the absolute path
-		// append to compute.HPK. the path to the config.json file
+		
+		// Step 1: Open the config.json file
 		file, err := os.Open(h.podDirectory.ConfigSlurmDir() + "/config.json")
-		// to understand where is looking the file let's execute pwd and see where is the working directory
-		resLS, err := process.Execute("ls", "-la")
-		logger.Info(" * Working Directory: ", "ls", string(resLS))
-		resPWD, err := process.Execute("pwd")
-		logger.Info(" * Working Directory: ", "pwd", string(resPWD))
+
 		if err != nil {
-			// Handle the error with compute.SystemPanic
 			compute.SystemPanic(err, "Error opening config.json for Default Slurm Type: ", h.podDirectory.ConfigSlurmDir() + "/config.json")
 			return
 		}
@@ -408,20 +402,17 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 		// Step 2: Unmarshal the JSON content into a map
 		byteValue, err := ioutil.ReadAll(file)
 		if err != nil {
-			// Handle the error with compute.SystemPanic
 			compute.SystemPanic(err, "Error reading config.json for Default Slurm Type: ", h.podDirectory.ConfigSlurmDir() + "/config.json")
 			return
 		}
 		err = json.Unmarshal(byteValue, &config)
 		if err != nil {
-			// Handle the error with compute.SystemPanic
 			compute.SystemPanic(err, "Error parsing config.json for Default Slurm Type: ", h.podDirectory.ConfigSlurmDir() + "/config.json")
 			return
 		}
 
 		// Step 3: Access the proper setting using the defaultFlag
 		if setting, exists := config[defaultFlag]; exists {
-			// Log the information with logger.Info
 			logger.Info("Setting for " + defaultFlag + ": " + setting)
 			// You can append this setting to totalFlags or use it otherwise
 			totalFlags = append(totalFlags, setting)
@@ -430,12 +421,12 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 			logger.Info("No setting found for " + defaultFlag)
 		}
 	}
+
 	logger.Info(" * Default Slurm Type has been set", "defaultFlag", totalFlags)
+
 	if customflags, hasFlags := h.Pod.GetAnnotations()[CustomSlurmFlags]; hasFlags {
 		totalFlags = append(totalFlags, strings.Split(customflags, " ")...)
 	}
-
-
 
 	scriptTemplate, err := ParseTemplate(HostScriptTemplate)
 	if err != nil {
@@ -443,8 +434,6 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	}
 
 	scriptFileContent := bytes.Buffer{}
-	
-	
 
 	if err := scriptTemplate.Execute(&scriptFileContent, JobFields{
 		Pod:                h.podKey,

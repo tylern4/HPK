@@ -209,7 +209,7 @@ function handle_containers() {
 	sh -c {{$container.EnvFilePath}} > /tmp/scratch/{{$container.InstanceName}}.env
 	{{- end}}
 
-	$(podman-hpc run --rm --network=host --no-hosts --workdir ${workdir} \
+	$(podman-hpc run --rm --gpu --network=host --no-hosts --workdir ${workdir} \
 	-e PARENT=${PPID} \
 	-v $HOME/.k8sfs/kubernetes:/k8s-data \
 	-v $HOME:$HOME \

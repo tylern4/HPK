@@ -353,10 +353,10 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	 * Prepare the Slurm Configuration
 	 *------------- ---------------------------*/
 
-	 configSlurmFileTemplate, err := ParseTemplate(GenerateConfigSlurmFile)
+	_, err := ParseTemplate(GenerateConfigSlurmFile)
 	 if err != nil {
 		 compute.SystemPanic(err, "generate config slurm template error")
-	 }
+	}
 
 	/*---------------------------------------------------
 	 * Prepare Fields for Sbatch Templates
@@ -371,7 +371,7 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 
 		// Step 1: Read the config.json file, use the absolute path
 		// append to compute.HPK. the path to the config.json file
-		file, err := os.Open(compute.HPK.ConfigDir() + "/config.json")
+		file, err := os.Open(compute.HPK.ConfigSlurmDir() + "/config.json")
 		// to understand where is looking the file let's execute pwd and see where is the working directory
 		res, err := process.Execute("pwd")
 		logger.Info(" * Working Directory: ", "pwd", res)

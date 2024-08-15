@@ -149,14 +149,6 @@ func (h *podHandler) buildContainer(container *corev1.Container, containerStatus
 	}
 
 	/*---------------------------------------------------
-	 * Prepare the Slurm Configuration
-	 *------------- ---------------------------*/
-
-	configSlurmFileTemplate, err := ParseTemplate(GenerateConfigSlurmFile)
-	if err != nil {
-		compute.SystemPanic(err, "generate config slurm template error")
-	}
-	/*---------------------------------------------------
 	 * Prepare fields for Container Template
 	 *---------------------------------------------------*/
 	containerPath := h.podDirectory.Container(container.Name)

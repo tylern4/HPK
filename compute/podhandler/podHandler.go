@@ -15,6 +15,8 @@
 package podhandler
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"bytes"
 	"context"
 	"io/fs"
@@ -348,6 +350,8 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	var totalFlags []string
 		//  default to the slurm type as a base
 		//  adding to customFlags
+	var config map[string]string
+
 
 	if defaultFlag, hasDefault := h.Pod.GetAnnotations()[DefaultSlurmType];  hasDefault{
 

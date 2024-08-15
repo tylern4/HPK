@@ -29,7 +29,7 @@ func Initialize() error {
 	}
 
 	compute.DefaultLogger.Info("Runtime info",
-		"WorkingDirectory", compute.HPK.String()
+		"WorkingDirectory", compute.HPK.String(),
 	)
 
 	return nil

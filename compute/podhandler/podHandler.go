@@ -370,10 +370,8 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	// Define the path where the config.json will be saved
 	configFilePath := "configSlurm/config.json"
 
-	// Ensure the directory exists
-	if err := os.MkdirAll("configSlurm", os.ModePerm); err != nil {
-		compute.SystemPanic(err, "cannot create directory for config file")
-	}
+	// print out the content of the config file
+	logger.Info(" * Config file content: ", "configFileContent", configFileContent.String())
 
 	// Write the generated content to the file
 	if err := os.WriteFile(configFilePath, []byte(configFileContent.String()), 0644); err != nil {

@@ -163,29 +163,10 @@ remove_pod:
 	 *---------------------------------------------------*/
 
 	if err := os.RemoveAll(podDir.String()); err != nil {
-		// if trying to remove directory from the host fails, try to delete it using a fakeroot containera.
+		// if trying to remove directory from the host fails, try to delete it using a fakeroot container
 		if errors.Is(err, fs.ErrPermission) {
-			compute.DefaultLogger.Info(" * Failed to remove directory from host. Try using fakeroot container.",
-				"err", err,
-			)
-
-			// try to delete directory using the fakeroot from pause container.
-			out, err := runtime.DefaultPauseImage.FakerootExec(
-				[]string{"--mount", "type=bind,src=" + podDir.String() + ",dst=/pod"}, // mount the pod directory in singularity
-				[]string{"rm", "-rf", "/pod/*"},                                       // remove the pod directory using fakeroot
-			)
-
-			compute.DefaultLogger.Info(" * Result",
-				"out", out,
-				"debug", []string{"-B", podDir.String() + ":" + podDir.String() + ":rw"},
-			)
-
-			if err != nil {
-				compute.SystemPanic(err, "failed to forcible remove pod directory '%s'", podDir)
-			}
-		} else {
 			compute.SystemPanic(err, "failed to remove pod directory '%s'", podDir)
-		}
+		} 
 	}
 
 	logger.Info(" * Pod directory is removed")
@@ -342,14 +323,6 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	}
 
 	/*---------------------------------------------------
-	 * Prepare Image for Pause Container
-	 *---------------------------------------------------*/
-	pauseImage, err := image.Pull(compute.HPK.ImageDir(), image.Docker, image.PauseImage)
-	if err != nil {
-		compute.SystemPanic(err, "ImagePull error. Image:%s", image.PauseImage)
-	}
-
-	/*---------------------------------------------------
 	 * Prepare the Slurm Configuration
 	 *------------- ---------------------------*/
 
@@ -437,7 +410,6 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 
 	if err := scriptTemplate.Execute(&scriptFileContent, JobFields{
 		Pod:                h.podKey,
-		PauseImageFilePath: pauseImage.ImageName,
 		HostEnv:            compute.Environment,
 		VirtualEnv: compute.VirtualEnvironment{
 			PodDirectory:        h.podDirectory.String(),

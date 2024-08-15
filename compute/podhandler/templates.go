@@ -332,9 +332,6 @@ echo "[HOST] **SYSTEMERROR** apptainer exited with code $?" | tee {{.VirtualEnv.
 type JobFields struct {
 	Pod types.NamespacedName
 
-	// PauseImageFilePath contains the name of the image for the pause container.
-	PauseImageFilePath string
-
 	// VirtualEnv is the equivalent of a Pod.
 	VirtualEnv compute.VirtualEnvironment
 

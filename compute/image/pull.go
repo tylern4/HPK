@@ -70,6 +70,7 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 			}, nil
 		}else{
 			compute.DefaultLogger.Info(" * Image does not exist", "image", imageName, "path", imageName)
+			compute.DefaultLogger.Info(" * Compared to: ", "image", imagePart, "path", imageName)
 		}
 	}
 

@@ -356,6 +356,9 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 
 		// Step 1: Read the config.json file
 		file, err := os.Open("config.json")
+		// to understand where is looking the file let's execute pwd and see where is the working directory
+		res, err := process.Execute("pwd")
+		logger.Info(" * Working Directory: ", "pwd", res)
 		if err != nil {
 			// Handle the error with compute.SystemPanic
 			compute.SystemPanic(err, "Error opening config.json for Default Slurm Type: ")

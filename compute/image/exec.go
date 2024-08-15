@@ -14,11 +14,6 @@
 
 package image
 
-import (
-	"github.com/carv-ics-forth/hpk/compute"
-	"github.com/carv-ics-forth/hpk/pkg/process"
-)
-
 // Image is an actionable object of a container image.
 type Image struct {
 	// Filepath points to the location where the image is stored.

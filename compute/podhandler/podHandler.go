@@ -435,8 +435,6 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 		totalFlags = append(totalFlags, strings.Split(customflags, " ")...)
 	}
 
-	logger.Info(" * Total Flags: ", totalFlags)
-
 
 
 	scriptTemplate, err := ParseTemplate(HostScriptTemplate)

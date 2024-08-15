@@ -404,18 +404,10 @@ echo {{$variable.Name}}=\''{{$variable.Value}}'\'
 {{- end}}
 `
 
-const GenerateConfigSlurmFile = `#!/bin/bash
-
-FILE_PATH="configSlurm/config.json"
-
-cat <<EOF > $FILE_PATH
-{
+const GenerateConfigSlurmFile = `{
     "cpu": "--constraint=cpu --account=m3792",
     "gpu": "--constraint=gpu --account=m3792"
-}
-EOF
-
-`
+}`
 
 // GenerateEnvFields provide the inputs to GenerateEnvTemplate.
 type GenerateEnvFields = struct {

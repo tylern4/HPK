@@ -368,7 +368,7 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	}
 
 	// Define the path where the config.json will be saved
-	configFilePath := h.podDirectory.ConfigSlurmDir()
+	configFilePath := h.podDirectory.ConfigSlurmDir() + "/config.json"
 
 	// print out the content of the config file
 	logger.Info(" * Config file content: ", "configFileContent", configFileContent.String())

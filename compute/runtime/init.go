@@ -5,7 +5,6 @@ import (
 
 	"github.com/carv-ics-forth/hpk/compute"
 	"github.com/carv-ics-forth/hpk/compute/endpoint"
-	"github.com/carv-ics-forth/hpk/compute/image"
 	"github.com/pkg/errors"
 )
 

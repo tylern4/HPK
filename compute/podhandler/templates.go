@@ -211,10 +211,12 @@ function handle_containers() {
 
 	$(podman-hpc run --rm --gpu --network=host --no-hosts --workdir ${workdir} \
 	-e PARENT=${PPID} \
+	-e MODEL_NAME=resnet \
 	-v $HOME/.k8sfs/kubernetes:/k8s-data \
 	-v $HOME:$HOME \
 	-v $SCRATCH/hpk-tmp:/tmp \
 	-v /tmp/scratch/:/scratch \
+	-v /pscratch/sd/d/duccio/models:/models \
 	--hostname $SLURM_JOB_NAME \
 	{{- if $container.RunAsUser}}
 	--user {{$container.RunAsUser}} \

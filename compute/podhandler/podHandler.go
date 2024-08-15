@@ -353,13 +353,31 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	 * Prepare the Slurm Configuration
 	 *------------- ---------------------------*/
 
+	// Parse the template
 	configSlurmFileTemplate, err := ParseTemplate(GenerateConfigSlurmFile)
-	 if err != nil {
-		 compute.SystemPanic(err, "generate config slurm template error")
-	}
-	err = configSlurmFileTemplate.Execute(os.Stdout, nil)
 	if err != nil {
-		compute.SystemPanic(err, "could not execute template")
+		compute.SystemPanic(err, "generate config slurm template error")
+	}
+
+	// Prepare the content holder
+	configFileContent := strings.Builder{}
+
+	// Execute the template (no data required in this case)
+	if err := configSlurmFileTemplate.Execute(&configFileContent, nil); err != nil {
+		compute.SystemPanic(err, "failed to evaluate config slurm template")
+	}
+
+	// Define the path where the config.json will be saved
+	configFilePath := "configSlurm/config.json"
+
+	// Ensure the directory exists
+	if err := os.MkdirAll("configSlurm", os.ModePerm); err != nil {
+		compute.SystemPanic(err, "cannot create directory for config file")
+	}
+
+	// Write the generated content to the file
+	if err := os.WriteFile(configFilePath, []byte(configFileContent.String()), 0644); err != nil {
+		compute.SystemPanic(err, "cannot write config file to '%s'", configFilePath)
 	}
 
 

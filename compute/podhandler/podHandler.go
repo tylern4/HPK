@@ -15,7 +15,6 @@
 package podhandler
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"bytes"
 	"context"

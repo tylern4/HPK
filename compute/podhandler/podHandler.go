@@ -400,7 +400,7 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 		logger.Info(" * Working Directory: ", "pwd", string(resPWD))
 		if err != nil {
 			// Handle the error with compute.SystemPanic
-			compute.SystemPanic(err, "Error opening config.json for Default Slurm Type: ")
+			compute.SystemPanic(err, "Error opening config.json for Default Slurm Type: ", h.podDirectory.ConfigSlurmDir() + "/config.json")
 			return
 		}
 		defer file.Close()
@@ -409,13 +409,13 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 		byteValue, err := ioutil.ReadAll(file)
 		if err != nil {
 			// Handle the error with compute.SystemPanic
-			compute.SystemPanic(err, "Error reading config.json for Default Slurm Type: ")
+			compute.SystemPanic(err, "Error reading config.json for Default Slurm Type: ", h.podDirectory.ConfigSlurmDir() + "/config.json")
 			return
 		}
 		err = json.Unmarshal(byteValue, &config)
 		if err != nil {
 			// Handle the error with compute.SystemPanic
-			compute.SystemPanic(err, "Error parsing config.json for Default Slurm Type: ")
+			compute.SystemPanic(err, "Error parsing config.json for Default Slurm Type: ", h.podDirectory.ConfigSlurmDir() + "/config.json")
 			return
 		}
 

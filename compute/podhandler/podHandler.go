@@ -353,10 +353,15 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	 * Prepare the Slurm Configuration
 	 *------------- ---------------------------*/
 
-	_, err := ParseTemplate(GenerateConfigSlurmFile)
+	configSlurmFileTemplate, err := ParseTemplate(GenerateConfigSlurmFile)
 	 if err != nil {
 		 compute.SystemPanic(err, "generate config slurm template error")
 	}
+	err = configSlurmFileTemplate.Execute(os.Stdout, nil)
+	if err != nil {
+		compute.SystemPanic(err, "could not execute template")
+	}
+
 
 	/*---------------------------------------------------
 	 * Prepare Fields for Sbatch Templates

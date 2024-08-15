@@ -249,6 +249,11 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 		compute.SystemPanic(err, "cannot create control file directory '%s'", h.podDirectory.ControlFileDir())
 	}
 
+	// create directory for the slurm configuration file.
+	if err := os.MkdirAll(h.podDirectory.ConfigSlurmDir(), endpoint.PodGlobalDirectoryPermissions); err != nil {
+		compute.SystemPanic(err, "cannot create slurm configuration directory '%s'", h.podDirectory.ConfigSlurmDir())
+	}
+
 	// watch for control files on the root directory of the pod.
 	// because fswatch does not work recursively, we cannot have the container directories nested within the pod.
 	// instead, we use a flat directory in the format "podir/containername.{jid,stdout,stdour,...}"
@@ -345,6 +350,15 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	}
 
 	/*---------------------------------------------------
+	 * Prepare the Slurm Configuration
+	 *------------- ---------------------------*/
+
+	 configSlurmFileTemplate, err := ParseTemplate(GenerateConfigSlurmFile)
+	 if err != nil {
+		 compute.SystemPanic(err, "generate config slurm template error")
+	 }
+
+	/*---------------------------------------------------
 	 * Prepare Fields for Sbatch Templates
 	 *---------------------------------------------------*/
 	var totalFlags []string
@@ -355,8 +369,9 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 
 	if defaultFlag, hasDefault := h.Pod.GetAnnotations()[DefaultSlurmType];  hasDefault{
 
-		// Step 1: Read the config.json file
-		file, err := os.Open("config.json")
+		// Step 1: Read the config.json file, use the absolute path
+		// append to compute.HPK. the path to the config.json file
+		file, err := os.Open(compute.HPK.ConfigDir() + "/config.json")
 		// to understand where is looking the file let's execute pwd and see where is the working directory
 		res, err := process.Execute("pwd")
 		logger.Info(" * Working Directory: ", "pwd", res)
@@ -401,9 +416,6 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	logger.Info(" * Total Flags: ", totalFlags)
 
 
-
-	// necessary for the template are constraints
-	// map the pod's annotations to the config.json
 
 	scriptTemplate, err := ParseTemplate(HostScriptTemplate)
 	if err != nil {

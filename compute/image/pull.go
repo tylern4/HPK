@@ -68,11 +68,9 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 			return &Image{
 				ImageName: imageName,
 			}, nil
-		}else{
-			compute.DefaultLogger.Info(" * Image does not exist", "image", imageName, "path", imageName)
-			compute.DefaultLogger.Info(" * Compared to: ", "image", imagePart, "path", imageName)
 		}
-	}
+	compute.DefaultLogger.Info(" * Image does not exist", "image", imageName, "path", imageName)
+
 
 	// otherwise, download a fresh copy
 	if _, err := process.Execute(compute.Environment.PodmanBin, "pull", imageName); err != nil {

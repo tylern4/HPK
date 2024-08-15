@@ -72,6 +72,7 @@ func LoadPodFromFile(filePath string) (*corev1.Pod, error) {
 }
 
 func SavePodToFile(_ context.Context, pod *corev1.Pod) error {
+	
 	if pod == nil {
 		return errors.Errorf("empty pod")
 	}

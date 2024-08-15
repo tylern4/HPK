@@ -41,6 +41,9 @@ func Pull(imageDir string, transport Transport, imageName string) (*Image, error
 
 	cleanOutput := strings.Trim(string(res), "{}\" \n")
 
+	// TODO: 
+	// Add the tag if there is no tag appending the latest tag
+
 	// Split the output into lines
 	lines := strings.Split(cleanOutput, "\n")
 

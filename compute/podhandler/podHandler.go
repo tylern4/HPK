@@ -392,7 +392,7 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 
 		// Step 1: Read the config.json file, use the absolute path
 		// append to compute.HPK. the path to the config.json file
-		file, err := os.Open(h.podDirectory.ControlFileDir() + "/config.json")
+		file, err := os.Open(h.podDirectory.ConfigSlurmDir() + "/config.json")
 		// to understand where is looking the file let's execute pwd and see where is the working directory
 		resLS, err := process.Execute("ls", "-la")
 		logger.Info(" * Working Directory: ", "ls", string(resLS))

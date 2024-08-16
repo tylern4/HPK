@@ -215,6 +215,7 @@ function handle_containers() {
 	-v $HOME/.k8sfs/kubernetes:/k8s-data \
 	-v $HOME:$HOME \
 	-v $SCRATCH:$SCRATCH \
+	-v $SCRATCH/models:/models \
 	-v $SCRATCH/hpk-tmp:/tmp \
 	-v /tmp/scratch/:/scratch \
 	--hostname $SLURM_JOB_NAME \

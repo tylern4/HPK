@@ -217,7 +217,6 @@ function handle_containers() {
 	-v $SCRATCH:$SCRATCH \
 	-v $SCRATCH/hpk-tmp:/tmp \
 	-v /tmp/scratch/:/scratch \
-	-v /pscratch/sd/d/duccio/models:/models \
 	--hostname $SLURM_JOB_NAME \
 	{{- if $container.RunAsUser}}
 	--user {{$container.RunAsUser}} \

@@ -215,10 +215,6 @@ func (p PodPath) ControlFileDir() string {
 	return filepath.Join(string(p), "controlfiles")
 }
 
-func (p PodPath) ConfigSlurmDir() string {
-	return filepath.Join(string(p), "configSlurm")
-}
-
 // EncodedJSONPath .hpk/namespace/podName/.virtualenv/pod.crd
 func (p PodPath) EncodedJSONPath() string {
 	return filepath.Join(p.JobDir(), "pod"+ExtensionCRD)

@@ -228,11 +228,6 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 		compute.SystemPanic(err, "cannot create control file directory '%s'", h.podDirectory.ControlFileDir())
 	}
 
-	// create directory for the slurm configuration file.
-	if err := os.MkdirAll(h.podDirectory.ConfigSlurmDir(), endpoint.PodGlobalDirectoryPermissions); err != nil {
-		compute.SystemPanic(err, "cannot create slurm configuration directory '%s'", h.podDirectory.ConfigSlurmDir())
-	}
-
 	// watch for control files on the root directory of the pod.
 	// because fswatch does not work recursively, we cannot have the container directories nested within the pod.
 	// instead, we use a flat directory in the format "podir/containername.{jid,stdout,stdour,...}"
@@ -324,30 +319,9 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	 * Prepare the Slurm Configuration
 	 *------------- ---------------------------*/
 
-	// Parse the template
-	configSlurmFileTemplate, err := ParseTemplate(GenerateConfigSlurmFile)
-	if err != nil {
-		compute.SystemPanic(err, "generate config slurm template error")
-	}
-
-	// Prepare the content holder
-	configFileContent := strings.Builder{}
-
-	// Execute the template (no data required in this case)
-	if err := configSlurmFileTemplate.Execute(&configFileContent, nil); err != nil {
-		compute.SystemPanic(err, "failed to evaluate config slurm template")
-	}
-
 	// Define the path where the config.json will be saved
-	configFilePath := h.podDirectory.ConfigSlurmDir() + "/config.json"
+	configFilePath := "/config.json"
 
-	// print out the content of the config file
-	logger.Info(" * Config file content: ", "configFileContent", configFileContent.String())
-
-	// Write the generated content to the file
-	if err := os.WriteFile(configFilePath, []byte(configFileContent.String()), 0644); err != nil {
-		compute.SystemPanic(err, "cannot write config file to '%s'", configFilePath)
-	}
 
 
 	/*---------------------------------------------------
@@ -362,7 +336,7 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	if defaultFlag, hasDefault := h.Pod.GetAnnotations()[DefaultSlurmType];  hasDefault{
 		
 		// Step 1: Open the config.json file
-		file, err := os.Open(h.podDirectory.ConfigSlurmDir() + "/config.json")
+		file, err := os.Open(configFilePath)
 
 		if err != nil {
 			compute.SystemPanic(err, "Error opening config.json for Default Slurm Type: ", h.podDirectory.ConfigSlurmDir() + "/config.json")

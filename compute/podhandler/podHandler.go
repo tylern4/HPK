@@ -320,7 +320,7 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	 *------------- ---------------------------*/
 
 	// Define the path where the config.json will be saved
-	configFilePath := "/config.json"
+	configFilePath := "config.json"
 
 
 

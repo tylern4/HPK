@@ -214,6 +214,7 @@ function handle_containers() {
 	-e MODEL_NAME=resnet \
 	-v $HOME/.k8sfs/kubernetes:/k8s-data \
 	-v $HOME:$HOME \
+	-v $SCRATCH:$SCRATCH \
 	-v $SCRATCH/hpk-tmp:/tmp \
 	-v /tmp/scratch/:/scratch \
 	-v /pscratch/sd/d/duccio/models:/models \

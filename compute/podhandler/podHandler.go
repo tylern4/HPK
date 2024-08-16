@@ -433,7 +433,7 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 		compute.SystemPanic(err, "unable to write sbatch script in file '%s'", scriptFilePath)
 	}
 
-	logger.Info(" * Slurm script has been generated TEST TEST")
+	logger.Info(" * Slurm script has been generated")
 
 	/*---------------------------------------------------
 	 * Submit job to Slurm, and store the JobID

@@ -14,7 +14,7 @@ import os
 # model with the name "resnet" and using the predict interface.
 # extract env variable RESNET_IP
 RESNET_IP = os.environ['RESNET_IP']
-SERVER_URL = 'http://{}:8501/v1/models/resnet:predict'.format(RESNET_IP)
+SERVER_URL = 'http://resnet-service:8501/v1/models/resnet:predict'.format(RESNET_IP)
 
 # The image URL is the location of the image we should send to the server
 IMAGE_PATH = 'dog.jpg'

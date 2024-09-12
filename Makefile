@@ -95,7 +95,7 @@ build-race: ## Build HPK binary with race condition detector
 # Runs the Kubernetes master using Podman
 run-podman:
 	mkdir -p ${K8SFS_PATH}/log
-	podman-hpc run --name=k8 --net=host --env K8SFS_MOCK_KUBELET=0 \
+	podman-hpc run --rm --name=k8s --net=host --env K8SFS_MOCK_KUBELET=0 \
 	-v $(HOME)/.k8sfs:/usr/local/etc \
 	-v $(HOME)/.k8sfs/log:/var/log \
 	ghcr.io/tylern4/tylern4/kubernetes-from-scratch:master 8444

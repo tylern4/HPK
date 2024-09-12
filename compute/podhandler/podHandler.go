@@ -15,9 +15,9 @@
 package podhandler
 
 import (
-	"io/ioutil"
 	"bytes"
 	"context"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -72,7 +72,7 @@ func LoadPodFromFile(filePath string) (*corev1.Pod, error) {
 }
 
 func SavePodToFile(_ context.Context, pod *corev1.Pod) error {
-	
+
 	if pod == nil {
 		return errors.Errorf("empty pod")
 	}
@@ -164,7 +164,7 @@ remove_pod:
 		// if trying to remove directory from the host fails, try to delete it using a fakeroot container
 		if errors.Is(err, fs.ErrPermission) {
 			compute.SystemPanic(err, "failed to remove pod directory '%s'", podDir)
-		} 
+		}
 	}
 
 	logger.Info(" * Pod directory is removed")
@@ -319,33 +319,26 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	 * Prepare the Slurm Configuration
 	 *------------- ---------------------------*/
 
-	// Define the path where the config.json will be saved
-	configFilePath := "config.json"
-
-
-
 	/*---------------------------------------------------
 	 * Prepare Fields for Sbatch Templates
 	 *---------------------------------------------------*/
 	var totalFlags []string
-		//  default to the slurm type as a base
-		//  adding to customFlags
+	//  default to the slurm type as a base
+	//  adding to customFlags
 	var config map[string]string
 
-
-	if defaultFlag, hasDefault := h.Pod.GetAnnotations()[DefaultSlurmType];  hasDefault{
-		
+	// Define the path where the config.json will be saved
+	configFilePath := "config.json"
+	if _, err := os.Stat(configFilePath); err == nil {
 		// Step 1: Open the config.json file
 		file, err := os.Open(configFilePath)
-
 		if err != nil {
 			compute.SystemPanic(err, "Error opening config.json for Default Slurm Type: config.json")
 			return
 		}
 		defer file.Close()
-
 		// Step 2: Unmarshal the JSON content into a map
-		byteValue, err := ioutil.ReadAll(file)
+		byteValue, err := io.ReadAll(file)
 		if err != nil {
 			compute.SystemPanic(err, "Error reading config.json for Default Slurm Type: config.json")
 			return
@@ -355,9 +348,14 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 			compute.SystemPanic(err, "Error parsing config.json for Default Slurm Type: config.json")
 			return
 		}
-
 		// Step 3: Access the proper setting using the defaultFlag
-		if setting, exists := config[defaultFlag]; exists {
+		if defaultFlag, hasDefault := h.Pod.GetAnnotations()[DefaultSlurmType]; hasDefault {
+			if setting, exists := config[defaultFlag]; exists {
+				logger.Info("Setting for " + defaultFlag + ": " + setting)
+				// You can append this setting to totalFlags or use it otherwise
+				totalFlags = append(totalFlags, setting)
+			}
+		} else if setting, exists := config["default"]; exists {
 			logger.Info("Setting for " + defaultFlag + ": " + setting)
 			// You can append this setting to totalFlags or use it otherwise
 			totalFlags = append(totalFlags, setting)
@@ -381,8 +379,8 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	scriptFileContent := bytes.Buffer{}
 
 	if err := scriptTemplate.Execute(&scriptFileContent, JobFields{
-		Pod:                h.podKey,
-		HostEnv:            compute.Environment,
+		Pod:     h.podKey,
+		HostEnv: compute.Environment,
 		VirtualEnv: compute.VirtualEnvironment{
 			PodDirectory:        h.podDirectory.String(),
 			CgroupFilePath:      h.podDirectory.CgroupFilePath(),
@@ -418,7 +416,6 @@ func CreatePod(ctx context.Context, pod *corev1.Pod, watcher filenotify.FileWatc
 	if err != nil {
 		compute.SystemPanic(err, "failed to submit job")
 	}
-
 	logger.Info(" * Slurm job has been submitted", "jobID", jobID)
 
 	// update pod with the slurm's job id
